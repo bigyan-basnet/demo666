@@ -1,9 +1,9 @@
 branch-defaults:
   default:
-    environment: RentACar-env1
+    environment: Demo666-env
     group_suffix: null
 global:
-  application_name: RentACar
+  application_name: demo666
   default_region: ap-southeast-2
   profile: null
   platform_name: PHP
