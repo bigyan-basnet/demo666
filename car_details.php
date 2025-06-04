@@ -1,124 +1,141 @@
 <?php
+require_once 'config.php'; // Connect to RDS
 
-include('server.php');
+// Enable error reporting
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-
-$con = mysqli_connect('localhost', 'root', '', 'car_rental_database');
-
-if (!$con) {
-  die("Connection failed: " . mysqli_connect_error());
-} else {
-  echo "Connected";
-}
-
+// Insert new car
 if (isset($_POST['submit'])) {
-  $car_my = mysqli_real_escape_string($con, $_POST['car_my']);
-  $car_model = mysqli_real_escape_string($con, $_POST['car_model']);
-  $car_colour = mysqli_real_escape_string($con, $_POST['car_colour']);
-  $rental_price = mysqli_real_escape_string($con, $_POST['rental_price']);
-  $booked = false;
+    $car_year = mysqli_real_escape_string($con, $_POST['car_year']);
+    $car_model = mysqli_real_escape_string($con, $_POST['car_model']);
+    $car_colour = mysqli_real_escape_string($con, $_POST['car_colour']);
+    $rental_price = mysqli_real_escape_string($con, $_POST['rental_price']);
+    $booked = 0;
 
+    $sql = "INSERT INTO car (car_year, car_model, car_colour, rental_price, booked) 
+            VALUES ('$car_year', '$car_model', '$car_colour', '$rental_price', '$booked')";
 
-  $sql = "INSERT INTO `car` (`car_my`, `car_model`, `car_colour`, `rental_price`) VALUES ('$car_my', '$car_model', '$car_colour', '$rental_price')";
+    $rs = mysqli_query($con, $sql);
 
-  $rs = mysqli_query($con, $sql);
-
-  if ($rs) {
-    echo "Contact Records Inserted";
-  }
+    if ($rs) {
+        echo "<script>alert('Car record inserted successfully.');</script>";
+    } else {
+        echo "<script>alert('Error: " . mysqli_error($con) . "');</script>";
+    }
 }
 
-$cr = mysqli_query($con, "SELECT * FROM car") or die(mysqli_error($con));
-$i = 1;
-
-
-while ($row = mysqli_fetch_array($cr)) { ?>
-  <tr>
-    <!-- <td><?php echo $i; ?></td> -->
-    <td class="car"><?php echo $row['car_model'] ?> </td>
-    <td class="delete">
-      <a href="car_details.php?del=<?php echo $row['ID'] ?>">Delete</a>
-
-      <!-- <a href="edit.php?edit=<?php echo $row['ID'] ?>">Edit</a> -->
-      <br>
-
-    </td>
-
-  </tr>
-<?php $i++;
+// Delete car if "del" parameter is set
+if (isset($_GET['del'])) {
+    $car_id = intval($_GET['del']);
+    $delete_sql = "DELETE FROM car WHERE ID = $car_id";
+    mysqli_query($con, $delete_sql);
+    echo "<script>alert('Car deleted successfully.'); window.location.href='car_details.php';</script>";
 }
-
-
-
-
 ?>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Car Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h2 {
+            text-align: center;
+        }
+        table {
+            width: 90%;
+            margin: 30px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        form {
+            width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f4f4f4;
+            border-radius: 10px;
+        }
+        form input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        input[type="submit"] {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .delete a {
+            color: red;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
 
+    <h2>Add a New Car</h2>
+    <form method="POST">
+        <label>Car Manufacture Year:</label>
+        <input type="number" name="car_year" placeholder="e.g. 2021" required>
 
+        <label>Car Model:</label>
+        <input type="text" name="car_model" required>
 
+        <label>Car Colour:</label>
+        <input type="text" name="car_colour" required>
 
+        <label>Rental Price per Day ($):</label>
+        <input type="number" step="0.01" name="rental_price" required>
 
+        <input type="submit" name="submit" value="Add Car">
+    </form>
 
-
-
-<main>
-  <h2>Car details</h2>
-
-  <form action="" id="form1" name="form2" method="POST">
+    <h2>Available Cars</h2>
     <table>
-      <tr>
-        <td>Car Manucature Year:</td>
-        <td>
-          <label>
-            <input name="car_my" type="Date" id="car_my" />
-          </label>
-        </td>
-      </tr>
-
-      <tr>
-        <td>Car model</td>
-        <td>
-          <label>
-            <input name="car_model" type="text" id="car_model" />
-          </label>
-        </td>
-      </tr>
-
-      <tr>
-        <td>car_colour</td>
-        <td>
-          <label>
-            <input name="car_colour" type="text" id="car_colour" />
-          </label>
-        </td>
-      </tr>
-
-      <tr>
-        <td>Rental price per day</td>
-        <td>
-          <label>
-            <input name="rental_price" type="number" id="rental_price" />
-          </label>
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <label>
-            <input type="submit" name="submit" id="button" />
-          </label>
-        </td>
-      </tr>
-
-
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Model</th>
+                <th>Year</th>
+                <th>Colour</th>
+                <th>Price per Day</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            $cr = mysqli_query($con, "SELECT * FROM car") or die(mysqli_error($con));
+            $i = 1;
+            while ($row = mysqli_fetch_assoc($cr)) {
+                echo "<tr>
+                        <td>{$i}</td>
+                        <td>{$row['car_model']}</td>
+                        <td>{$row['car_year']}</td>
+                        <td>{$row['car_colour']}</td>
+                        <td>\${$row['rental_price']}</td>
+                        <td class='delete'><a href='car_details.php?del={$row['ID']}' onclick=\"return confirm('Are you sure?')\">Delete</a></td>
+                      </tr>";
+                $i++;
+            }
+            ?>
+        </tbody>
     </table>
-  </form>
 
-
-
-
-
-
-
-
-</main>
+</body>
+</html>
