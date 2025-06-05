@@ -70,7 +70,7 @@
 
   <div class="main-page">
     <div class="text-container">
-      <h1>Welcome to EzyRentals DevOps </h1>
+      <h1>Welcome to EzyRentals DevOps 0.1 </h1>
       <p>
         Discover and book your dream car with ease. Whether you're planning a weekend adventure or a business trip,<br>
         our platform offers a variety of top-tier vehicles at competitive prices.
